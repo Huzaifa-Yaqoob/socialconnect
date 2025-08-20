@@ -120,3 +120,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+/* no scroll bar for react-select input field */
+.no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+input[type='password']::-ms-reveal,
+input[type='password']::-ms-clear {
+    display: none;
+}

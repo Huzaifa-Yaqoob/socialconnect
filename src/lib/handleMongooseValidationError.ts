@@ -12,7 +12,7 @@ function handleMongooseValidationError(error: any): Record<string, string> | nul
 
   if (error.code === 11000 && error.keyValue) {
     for (const [field, value] of Object.entries(error.keyValue)) {
-      formattedErrors[field] = `${field} doit être unique. Valeur '${value}' est déjà pris.`;
+      formattedErrors[field] = `This ${field} is already taken. Please choose another one.`;
     }
     return formattedErrors;
   }
