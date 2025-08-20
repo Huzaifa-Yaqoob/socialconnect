@@ -4,9 +4,12 @@ import { connectToDatabase } from "@/db/connect";
 import User from "@/db/schemas/user.schema";
 import { getSession } from "@/lib/getSession"; // Adjust import path based on your auth setup
 import { revalidatePath } from "next/cache";
+import handleMongooseValidationError from "@/lib/handleMongooseValidationError";
+import { redirect } from "next/navigation";
 
 interface Interest {
   value: string;
+  _id?: string;
   label: string;
 }
 
@@ -23,16 +26,18 @@ interface ActionResult {
   data?: any;
 }
 
-export async function updateUserSettings(data: UpdateUserSettingsData): Promise<ActionResult> {
+export async function updateUserSettings(data: UpdateUserSettingsData) {
+  console.log("asas", data);
+  // return {
+  //   success: true,
+  //   data: {},
+  // };
   try {
     // Get current user session
     const session = await getSession();
 
     if (!session?.id) {
-      return {
-        success: false,
-        error: "Authentication required",
-      };
+      redirect("/auth?form=login");
     }
 
     // Connect to database
@@ -48,7 +53,7 @@ export async function updateUserSettings(data: UpdateUserSettingsData): Promise<
       if (existingUser) {
         return {
           success: false,
-          error: "Username is already taken",
+          error: { username: "Username is already taken" },
         };
       }
     }
@@ -57,105 +62,34 @@ export async function updateUserSettings(data: UpdateUserSettingsData): Promise<
     const updateData: any = {};
 
     if (data.username) updateData.username = data.username.trim();
-    if (data.name !== undefined) updateData.name = data.name?.trim() || "";
-    if (data.avatar !== undefined) updateData.avatar = data.avatar?.trim() || "";
-    if (data.interests) updateData.interests = data.interests;
-
-    // Update user
-    const updatedUser = await User.findByIdAndUpdate(session.id, updateData, {
-      new: true,
-      runValidators: true,
-      select: "username name avatar interests createdAt updatedAt",
-    });
-
-    if (!updatedUser) {
-      return {
-        success: false,
-        error: "User not found",
-      };
+    if (data.name) updateData.name = data.name?.trim() || "";
+    if (data.avatar) updateData.avatar = data.avatar?.trim() || "";
+    if (data.interests) {
+      // Remove _id from each interest object if it exists
+      updateData.interests = data.interests.map((interest) => {
+        if (!interest?._id) return interest;
+        const { _id, ...rest } = interest; // Destructure and remove _id
+        return rest;
+      });
     }
 
-    // Revalidate relevant paths
-    revalidatePath("/settings");
-    revalidatePath("/profile");
+    console.log(updateData, "okkk");
+
+    // Update user
+    await User.findByIdAndUpdate(session.id, updateData, {
+      runValidators: true,
+    });
 
     return {
       success: true,
-      data: {
-        username: updatedUser.username,
-        name: updatedUser.name,
-        avatar: updatedUser.avatar,
-        interests: updatedUser.interests,
-      },
+      data: {},
     };
   } catch (error: any) {
     console.error("Error updating user settings:", error);
 
-    // Handle validation errors
-    if (error.name === "ValidationError") {
-      const firstError = Object.values(error.errors)[0] as any;
-      return {
-        success: false,
-        error: firstError?.message || "Validation failed",
-      };
-    }
-
-    // Handle duplicate key error (username)
-    if (error.code === 11000) {
-      return {
-        success: false,
-        error: "Username is already taken",
-      };
-    }
-
     return {
       success: false,
-      error: "Failed to update settings. Please try again.",
-    };
-  }
-}
-
-export async function getCurrentUserSettings(): Promise<ActionResult> {
-  try {
-    // Get current user session
-    const session = await getSession();
-
-    if (!session?.id) {
-      return {
-        success: false,
-        error: "Authentication required",
-      };
-    }
-
-    // Connect to database
-    await connectToDatabase();
-
-    // Get current user data
-    const user = await User.findById(session.id).select(
-      "username name avatar interests createdAt updatedAt"
-    );
-
-    if (!user) {
-      return {
-        success: false,
-        error: "User not found",
-      };
-    }
-
-    return {
-      success: true,
-      data: {
-        username: user.username,
-        name: user.name || "",
-        avatar: user.avatar || "",
-        interests: user.interests || [],
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching user settings:", error);
-    return {
-      success: false,
-      error: "Failed to fetch user settings",
+      error: handleMongooseValidationError(error),
     };
   }
 }

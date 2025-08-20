@@ -1,29 +1,25 @@
-import SettingsForm from "@/components/forms/EditSetting";
-import { getCurrentUserSettings } from "@/lib/update";
 import { redirect } from "next/navigation";
+import EditSetting from "@/components/forms/EditSetting";
+import { connectToDatabase } from "@/db/connect";
+import User from "@/db/schemas/user.schema";
+import { getSession } from "@/lib/getSession";
 
 export default async function SettingsPage() {
   // Fetch current user settings
-  const result = await getCurrentUserSettings();
+  await connectToDatabase();
+  const session = await getSession();
 
-  console.log(result);
-
-  if (!result.success) {
-    // Redirect to login if not authenticated
-    if (result.error === "Authentication required") {
-      redirect("/login");
-    }
-
-    // Handle other errors
-    return (
-      <div className="container mx-auto py-8">
-        <div className="text-center">
-          <h1 className="mb-4 text-2xl font-bold text-red-600">Error</h1>
-          <p className="text-gray-600">{result.error}</p>
-        </div>
-      </div>
-    );
+  if (!session) {
+    redirect("/auth/?form=login");
   }
+
+  const user = await User.findById(session?.id)
+    .select("name avatar bio interests username -_id")
+    .lean();
+
+  console.log(user);
+
+  // Handle other errors
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -32,7 +28,7 @@ export default async function SettingsPage() {
         <p className="text-muted-foreground mt-2">Manage your account settings and preferences.</p>
       </div>
 
-      {/*<SettingsForm initialValues={result.data} />*/}
+      <EditSetting initialValues={JSON.parse(JSON.stringify(user))} />
     </div>
   );
 }

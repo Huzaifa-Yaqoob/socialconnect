@@ -3,52 +3,64 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { registrationSchema } from "./schena";
+import { registrationSchema } from "@/components/forms/auth/schena";
 import { Button } from "@/components/ui/button";
 import { Form, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { FieldRenderer } from "@/components/ui/bloom/field-renderer";
-import Link from "next/link";
 import { ReactCreatableSelect } from "@/components/ui/bloom/react-select-input";
-import { PasswordInput } from "@/components/ui/bloom/password-input";
-import { register, type ReturnType } from "@/components/forms/auth/action";
-import setFormError from "@/lib/setFormErrors";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { uploadImageAction } from "@/lib/uploadFile";
+import { updateUserSettings } from "@/lib/update";
 
+// Default options for multi-select
 const defaultOptions = [
   { value: "coding", label: "Coding" },
   { value: "reading", label: "Reading" },
 ];
 
-function EditForm({ initialValues }: { initialValues: z.infer<typeof registrationSchema> }) {
-  const router = useRouter();
-  const form = useForm<z.infer<typeof registrationSchema>>({
-    resolver: zodResolver(registrationSchema),
-    defaultValues: {
-      username: "",
-      name: "",
-      password: "",
-      interests: [],
-    },
+const eeitSchema = registrationSchema
+  .extend({ bio: z.string().optional(), avatar: z.string().optional() })
+  .omit({ password: true });
+
+function EditForm({ initialValues }: { initialValues: z.infer<typeof eeitSchema> }) {
+  const form = useForm<z.infer<typeof eeitSchema>>({
+    resolver: zodResolver(eeitSchema),
+    defaultValues: { ...initialValues, bio: initialValues.bio || "" },
   });
 
+  // State to manage avatar file
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+
   // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<typeof registrationSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+  async function onSubmit(values: z.infer<typeof eeitSchema>) {
+    // If there's an avatar file, upload it first
+
+    // After uploading avatar, submit the rest of the form values
     console.log(values);
-    const data = await register(values);
+    const data = await updateUserSettings(values);
     if (data.error) {
-      setFormError(data.error, form);
-    } else if (data?.data) {
-      router.push("/" + data.data.username);
+      // setFormError(data.error, form);
+    }
+  }
+
+  // Function to handle avatar file upload to the server (adjust as per your API)
+  async function handleImageUpload(file: File) {
+    // setUploading(true);
+    const value = await uploadImageAction(file);
+    if (value.success) {
+      form.setValue("avatar", value.url);
+      // setUploading(false);
+    } else if (value.error) {
+      form.setError("avatar", value.error);
+      // setUploading(false);
     }
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <h3 className={"text-center text-3xl font-bold"}>Register</h3>
+        {/* Username Field */}
         <FormField
           control={form.control}
           name="username"
@@ -58,6 +70,8 @@ function EditForm({ initialValues }: { initialValues: z.infer<typeof registratio
             </FieldRenderer>
           )}
         />
+
+        {/* Name Field */}
         <FormField
           control={form.control}
           name="name"
@@ -68,16 +82,7 @@ function EditForm({ initialValues }: { initialValues: z.infer<typeof registratio
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FieldRenderer label="Password">
-              <PasswordInput {...field} />
-            </FieldRenderer>
-          )}
-        />
-
+        {/* Interests Field */}
         <FormField
           control={form.control}
           name="interests"
@@ -88,14 +93,42 @@ function EditForm({ initialValues }: { initialValues: z.infer<typeof registratio
           )}
         />
 
+        {/* Bio Field */}
+        <FormField
+          control={form.control}
+          name="bio"
+          render={({ field }) => (
+            <FieldRenderer label="Bio">
+              <Input {...field} />
+            </FieldRenderer>
+          )}
+        />
+
+        {/* Avatar Upload Field */}
+        <FormField
+          control={form.control}
+          name="avatar"
+          render={({ field }) => (
+            <FieldRenderer label="Avatar">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleImageUpload(file);
+                  }
+                }}
+              />
+            </FieldRenderer>
+          )}
+        />
+
+        {/* Submit Button */}
         <Button type="submit">Submit</Button>
       </form>
-      If already have an account,{" "}
-      <Button variant={"link"} className={"m-0 p-0 text-base"}>
-        <Link href={"/auth?form=login"}>Log In</Link>
-      </Button>
     </Form>
   );
 }
 
-export default Register;
+export default EditForm;

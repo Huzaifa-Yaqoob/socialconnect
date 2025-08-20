@@ -83,8 +83,3 @@ export async function login(data: z.infer<typeof loginSchema>) {
     return { error: "Something went wrong", data: null };
   }
 }
-
-export type ReturnType = {
-  error: any;
-  data: { _id: string; username: string };
-};
