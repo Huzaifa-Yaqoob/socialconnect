@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 import bcrypt from "bcrypt";
 
 export interface IUser extends Document {
@@ -7,7 +7,8 @@ export interface IUser extends Document {
   avatar?: string;
   name: string;
   bio?: string;
-  interests: string[];
+  interests: { value: string; label: string }[];
+  following: Types.ObjectId[]; // NEW FIELD
 
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
@@ -27,13 +28,13 @@ const UserSchema: Schema<IUser> = new Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters long"],
-      select: false, // prevent returning password in queries by default
+      select: false,
     },
     avatar: {
       type: String,
       validate: {
         validator: (v: string) => {
-          if (!v) return true; // allow empty/undefined
+          if (!v) return true;
           try {
             new URL(v);
             return true;
@@ -63,11 +64,15 @@ const UserSchema: Schema<IUser> = new Schema(
       ],
       default: [],
     },
+    following: {
+      type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+      default: [],
+    },
   },
   { timestamps: true }
 );
 
-// Pre-save hook to hash password
+// Hash password pre-save
 UserSchema.pre<IUser>("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -80,7 +85,7 @@ UserSchema.pre<IUser>("save", async function (next) {
   }
 });
 
-// Method to compare passwords
+// Compare password
 UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };

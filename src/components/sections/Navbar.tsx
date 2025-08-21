@@ -1,14 +1,25 @@
-"use client";
-
 import { logout } from "@/actions/logout";
 import AddPostDialog from "@/components/forms/post/AddPostDialog";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { getSession } from "@/lib/getSession";
+import { connectToDatabase } from "@/db/connect";
+import User from "@/db/schemas/user.schema";
+import { redirect } from "next/navigation";
 
-function Navbar() {
+async function Navbar() {
+  const session = await getSession();
+  if (!session) {
+    redirect("/auth");
+  }
+
+  const user = await User.findById(session.id);
+
   return (
     <nav className="flex items-center justify-between bg-white px-6 py-3 shadow">
-      <div className="text-xl font-bold">MyApp</div>
+      <Link href={`/${user.username}`} className="text-xl font-bold">
+        MyApp
+      </Link>
       <div className={"flex items-center gap-4"}>
         <Link href={`/search`} className={buttonVariants({ variant: "link" })}>
           Search

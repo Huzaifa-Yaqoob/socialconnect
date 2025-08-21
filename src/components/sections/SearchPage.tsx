@@ -6,12 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
+import FollowButton from "@/components/sections/FollowUnfollow";
 
 interface User {
   _id: string;
   username: string;
   name?: string;
   avatar?: string;
+  followedByCurrentUser?: boolean; // add this from server
 }
 
 interface Post {
@@ -26,7 +28,11 @@ interface Post {
   createdAt: string;
 }
 
-export default function SearchPage() {
+interface SearchPageProps {
+  currentUserId: string; // pass session.id from parent
+}
+
+export default function SearchPage({ currentUserId }: SearchPageProps) {
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -74,16 +80,21 @@ export default function SearchPage() {
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-4">
             {users.map((user) => (
-              <Card className="rounded-2xl border shadow-none">
-                <CardContent className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={user.avatar} />
-                    <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="font-semibold">{user.name || user.username}</span>
-                    <span className="text-muted-foreground text-sm">@{user.username}</span>
+              <Card className="rounded-2xl border shadow-none" key={user._id}>
+                <CardContent className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={user.avatar} />
+                      <AvatarFallback>{user.username[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="font-semibold">{user.name || user.username}</span>
+                      <span className="text-muted-foreground text-sm">@{user.username}</span>
+                    </div>
                   </div>
+
+                  {/* FollowButton */}
+                  <FollowButton targetUserId={user._id.toString()} currentUserId={currentUserId} />
                 </CardContent>
               </Card>
             ))}
@@ -92,7 +103,7 @@ export default function SearchPage() {
           {/* Posts Tab */}
           <TabsContent value="posts" className="space-y-4">
             {posts.map((post) => (
-              <Link href={`/post/${post._id}`} className={"block"} key={post._id}>
+              <Link href={`/post/${post._id}`} className="block" key={post._id}>
                 <Card className="rounded-2xl border shadow-none">
                   <CardContent className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
