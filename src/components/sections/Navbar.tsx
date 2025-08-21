@@ -24,6 +24,9 @@ async function Navbar() {
         <Link href={`/search`} className={buttonVariants({ variant: "link" })}>
           Search
         </Link>
+        <Link href={`/mine`} className={buttonVariants({ variant: "link" })}>
+          My Connections
+        </Link>
         <Link href={`/settings`} className={buttonVariants({ variant: "link" })}>
           Settings
         </Link>
