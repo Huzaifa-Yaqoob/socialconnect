@@ -9,8 +9,8 @@ interface PageProps {
 
 export default async function Page({ params, searchParams }: PageProps) {
   const { username } = await params;
-  // const p = await searchParams();
-  const page = Number(searchParams.page) || 1;
+  const p = await searchParams;
+  const page = Number(p.page) || 1;
   const session = await getSession();
 
   console.log(session);

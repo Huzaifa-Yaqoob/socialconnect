@@ -2,9 +2,6 @@
 import Post from "@/db/schemas/post.schema";
 import User from "@/db/schemas/user.schema";
 
-/**
- * Get latest posts with user details and pagination
- */
 export async function getLatestPosts(page: number = 1, limit: number = 10) {
   try {
     const skip = (page - 1) * limit;
@@ -21,7 +18,7 @@ export async function getLatestPosts(page: number = 1, limit: number = 10) {
 
     return posts.map((post: any) => ({
       id: post._id.toString(),
-      description: post.description,
+      description: post.text,
       image: post.image || null,
       createdAt: post.createdAt,
       user: {

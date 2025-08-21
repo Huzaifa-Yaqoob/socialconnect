@@ -18,6 +18,7 @@ interface UpdateUserSettingsData {
   name?: string;
   avatar?: string;
   interests: Interest[];
+  bio?: string;
 }
 
 interface ActionResult {
@@ -64,6 +65,7 @@ export async function updateUserSettings(data: UpdateUserSettingsData) {
     if (data.username) updateData.username = data.username.trim();
     if (data.name) updateData.name = data.name?.trim() || "";
     if (data.avatar) updateData.avatar = data.avatar?.trim() || "";
+    if (data.bio) updateData.bio = data.bio?.trim() || "";
     if (data.interests) {
       // Remove _id from each interest object if it exists
       updateData.interests = data.interests.map((interest) => {
@@ -76,9 +78,15 @@ export async function updateUserSettings(data: UpdateUserSettingsData) {
     console.log(updateData, "okkk");
 
     // Update user
-    await User.findByIdAndUpdate(session.id, updateData, {
-      runValidators: true,
-    });
+    const user = await User.findById(session.id);
+
+    user.username = updateData.username;
+    user.avatar = updateData.avatar;
+    user.name = updateData.name;
+    user.interests = updateData.interests;
+    user.bio = updateData.bio;
+
+    await user.save();
 
     return {
       success: true,

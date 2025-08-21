@@ -5,7 +5,8 @@ export interface IUser extends Document {
   username: string;
   password: string;
   avatar?: string;
-  name?: string;
+  name: string;
+  bio?: string;
   interests: string[];
 
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -46,6 +47,11 @@ const UserSchema: Schema<IUser> = new Schema(
     name: {
       type: String,
       maxlength: [50, "Name must be at most 50 characters long"],
+      trim: true,
+    },
+    bio: {
+      type: String,
+      default: "",
       trim: true,
     },
     interests: {
