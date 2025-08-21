@@ -10,6 +10,9 @@ function Navbar() {
     <nav className="flex items-center justify-between bg-white px-6 py-3 shadow">
       <div className="text-xl font-bold">MyApp</div>
       <div className={"flex items-center gap-4"}>
+        <Link href={`/search`} className={buttonVariants({ variant: "link" })}>
+          Search
+        </Link>
         <Link href={`/settings`} className={buttonVariants({ variant: "link" })}>
           Settings
         </Link>
