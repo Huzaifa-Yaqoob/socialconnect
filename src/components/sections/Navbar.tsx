@@ -4,16 +4,13 @@ import { logout } from "@/actions/logout";
 import AddPostDialog from "@/components/forms/post/AddPostDialog";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { usePathname } from "next/navigation";
 
 function Navbar() {
-  const pathname = usePathname();
-
   return (
     <nav className="flex items-center justify-between bg-white px-6 py-3 shadow">
       <div className="text-xl font-bold">MyApp</div>
       <div className={"flex items-center gap-4"}>
-        <Link href={`${pathname}/settings`} className={buttonVariants({ variant: "link" })}>
+        <Link href={`/settings`} className={buttonVariants({ variant: "link" })}>
           Settings
         </Link>
         <AddPostDialog />

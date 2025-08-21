@@ -2,6 +2,7 @@
 import { getLatestPosts } from "@/lib/getLatestPost";
 import { Button } from "@/components/ui/button";
 import Delete from "@/components/sections/Delete";
+import Link from "next/link";
 
 type PostsListProps = {
   page?: number;
@@ -20,7 +21,11 @@ export default async function PostsList({ page = 1, userId }: PostsListProps) {
   return (
     <div className="space-y-6">
       {posts.map((post) => (
-        <div key={post.id} className="rounded-lg border p-4 shadow-sm">
+        <Link
+          href={`/post/${post.id}`}
+          key={post.id}
+          className="block rounded-lg border p-4 shadow-sm"
+        >
           <div className="mb-2 flex items-center gap-3">
             {post.user.avatar ? (
               <img
@@ -41,7 +46,7 @@ export default async function PostsList({ page = 1, userId }: PostsListProps) {
           <div className="mt-2 text-sm text-gray-500">
             {new Date(post.createdAt).toLocaleString()}
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );
