@@ -13,6 +13,9 @@ function Navbar() {
         <Link href={`/settings`} className={buttonVariants({ variant: "link" })}>
           Settings
         </Link>
+        <Link href={`/suggestions`} className={buttonVariants({ variant: "link" })}>
+          Suggestions
+        </Link>
         <AddPostDialog />
         <form action={logout}>
           <button

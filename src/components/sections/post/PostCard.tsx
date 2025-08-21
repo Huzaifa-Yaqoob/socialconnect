@@ -75,7 +75,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
             <CommentList comments={comments} />
             <CommentForm
               postId={post._id}
-              onCommentSubmit={(comment) => setComments((prev) => [...prev, comment])}
+              onCommentSubmit={(comment) => setComments((prev: any) => [...prev, comment])}
             />
           </div>
         </CardContent>
