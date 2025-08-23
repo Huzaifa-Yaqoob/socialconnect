@@ -1,22 +1,27 @@
-import ChatPage from "@/components/sections/Chats";
+import { openChat, getMessages } from "@/actions/chats";
 import { getSession } from "@/lib/getSession";
+import ChatWindow from "@/components/sections/ChatWindow";
 import { redirect } from "next/navigation";
 
 interface PageProps {
   params: Promise<{ userId: string }>;
 }
 
-export default async function Page({ params }: PageProps) {
-  const { userId } = await params;
+export default async function ChatPage({ params }: PageProps) {
   const session = await getSession();
 
-  if (!session) {
-    redirect("/auth");
+  if (!session?.id) {
+    redirect("/auth/?form=login");
   }
 
+  const { userId } = await params;
+
+  const chat = await openChat(session.id, userId);
+  const initialMessages = await getMessages(chat._id);
+
   return (
-    <div className={"flex items-center justify-center"}>
-      <ChatPage userId={userId} sessionId={session.id} />
+    <div className="px-4 py-6">
+      <ChatWindow chatId={chat._id} currentUserId={session.id} initialMessages={initialMessages} />
     </div>
   );
 }
