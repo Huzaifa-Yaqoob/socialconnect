@@ -12,12 +12,13 @@ async function Navbar() {
   if (!session) {
     redirect("/auth");
   }
+  // await connectToDatabase();
 
-  const user = await User.findById(session.id);
+  // const user = await User.findById(session.id);
 
   return (
     <nav className="flex items-center justify-between bg-white px-6 py-3 shadow">
-      <Link href={`/${user.username}`} className="text-xl font-bold">
+      <Link href={`/${"user.username"}`} className="text-xl font-bold">
         MyApp
       </Link>
       <div className={"flex items-center gap-4"}>

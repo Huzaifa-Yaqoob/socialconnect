@@ -8,7 +8,7 @@ import User from "@/db/schemas/user.schema";
 export async function getComments(postId: string) {
   await connectToDatabase();
 
-  const comments = await Comment.find({ post: postId })
+  const comments = await Comment.find({ postId: postId })
     .populate("owner", "username avatar name")
     .sort({ createdAt: 1 })
     .lean();

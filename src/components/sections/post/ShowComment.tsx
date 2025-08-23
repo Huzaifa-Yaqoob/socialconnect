@@ -1,10 +1,12 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getOwnerDetail } from "@/actions/getOwnerData";
+import { useEffect, useState } from "react";
 
 interface Comment {
   _id: string;
-  owner: { avatar: string; name: string; username: string };
+  owner: string;
   text: string;
 }
 
@@ -17,18 +19,31 @@ export function CommentList({ comments }: CommentProps) {
     <div className="space-y-4">
       {comments.map((comment) => (
         <div key={comment._id} className="flex gap-3">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={comment.owner?.avatar} />
-            <AvatarFallback>{comment.owner?.username?.[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="text-sm font-semibold">
-              {comment.owner?.name || comment.owner?.username}
-            </p>
-            <p className="text-muted-foreground text-sm">{comment.text}</p>
-          </div>
+          <OwnerDetails owner={comment.owner} text={comment.text} />
         </div>
       ))}
     </div>
+  );
+}
+
+function OwnerDetails({ owner, text }: { owner: string; text: string }) {
+  const [ownerDta, setOwnerDta] = useState<any>({});
+  useEffect(() => {
+    (async () => {
+      const data = await getOwnerDetail(owner);
+      setOwnerDta(data);
+    })();
+  }, [owner]);
+  return (
+    <>
+      <Avatar className="h-8 w-8">
+        <AvatarImage src={ownerDta?.avatar} />
+        <AvatarFallback>{ownerDta?.username?.[0]?.toUpperCase()}</AvatarFallback>
+      </Avatar>
+      <div>
+        <p className="text-sm font-semibold">{ownerDta?.name || ownerDta?.username}</p>
+        <p className="text-muted-foreground text-sm">{text}</p>
+      </div>
+    </>
   );
 }

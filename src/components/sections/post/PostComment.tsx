@@ -1,14 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { postComment } from "@/actions/postComment";
+import { addComment } from "@/actions/comment";
 
-interface CommentFormProps {
-  postId: string;
-  onCommentSubmit: (comment: any) => void;
-}
-
-export function CommentForm({ postId, onCommentSubmit }: CommentFormProps) {
+export function CommentForm({ postId, onCommentSubmit }: any) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,9 +13,18 @@ export function CommentForm({ postId, onCommentSubmit }: CommentFormProps) {
 
     setLoading(true);
     try {
-      const newComment = await postComment(postId, text.trim());
+      const newComment = await addComment(postId, {
+        // owner: {
+        //   _id: "123", // get from session
+        //   name: "John Doe",
+        //   username: "johnd",
+        //   avatar: "https://i.pravatar.cc/100",
+        // },
+        text: text.trim(),
+      });
+
       setText("");
-      onCommentSubmit?.(newComment);
+      onCommentSubmit(newComment); // updates local state instantly
     } catch (err) {
       console.error(err);
     } finally {

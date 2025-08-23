@@ -7,7 +7,12 @@ import { Calendar } from "lucide-react";
 import Like from "@/components/sections/post/Like";
 import { CommentList } from "@/components/sections/post/ShowComment";
 import { CommentForm } from "@/components/sections/post/PostComment";
-import { getComments } from "@/actions/getComment";
+import { getComments } from "@/actions/comment";
+import { io } from "socket.io-client";
+
+const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
+  transports: ["websocket"],
+});
 
 interface PostCardProps {
   post: Awaited<ReturnType<typeof import("@/actions/getDetailedPost").getPostById>>;
@@ -18,8 +23,28 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   const [comments, setComments] = useState<any>([]);
 
   useEffect(() => {
-    getComments(post).then((data) => setComments(data));
-  }, [post]);
+    // Fetch existing comments
+    getComments(post._id).then((c) => {
+      setComments(c);
+    });
+
+    // Join socket room
+    socket.emit("joinPost", post._id);
+
+    // Listen for new comments
+    socket.on("newComment", (comment) => {
+      if (comment.postId === post._id) {
+        setComments((prev: any) => {
+          const newC = prev.filter((c: any) => prev._id !== c._id);
+          return [...prev, comment];
+        });
+      }
+    });
+
+    return () => {
+      socket.off("newComment");
+    };
+  }, [post._id]);
 
   return (
     <div className="flex justify-center px-4 py-6">
@@ -75,7 +100,9 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
             <CommentList comments={comments} />
             <CommentForm
               postId={post._id}
-              onCommentSubmit={(comment) => setComments((prev: any) => [...prev, comment])}
+              onCommentSubmit={(c: any) => {
+                console.log(c);
+              }}
             />
           </div>
         </CardContent>
