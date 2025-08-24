@@ -3,6 +3,8 @@
 import { connectToDatabase } from "@/db/connect";
 import User from "@/db/schemas/user.schema";
 import Post from "@/db/schemas/post.schema";
+import { getSession } from "@/lib/getSession";
+import { redirect } from "next/navigation";
 
 interface SearchResult {
   users: {
@@ -29,13 +31,24 @@ export async function searchEverything(query: string): Promise<SearchResult> {
     return { users: [], posts: [] };
   }
 
+  const session = await getSession();
+
+  if (!session) {
+    redirect("/auth");
+  }
+
   await connectToDatabase();
 
   const searchRegex = new RegExp(query.trim(), "i"); // case-insensitive
 
   // Search users by username or name
   const users = await User.find({
-    $or: [{ username: searchRegex }, { name: searchRegex }],
+    $and: [
+      { _id: { $ne: session.id } }, // exclude this userId
+      {
+        $or: [{ username: searchRegex }, { name: searchRegex }],
+      },
+    ],
   }).select("username name avatar");
 
   // Search posts by text and populate owner

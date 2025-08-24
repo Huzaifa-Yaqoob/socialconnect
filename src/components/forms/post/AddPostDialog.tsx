@@ -5,7 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 function AddPostDialog() {
   return (
     <Dialog>
-      <DialogTrigger className={buttonVariants({ variant: "default" })}>Add</DialogTrigger>
+      <DialogTrigger className={buttonVariants({ variant: "secondary" })}>Add</DialogTrigger>
       <DialogContent>
         <DialogTitle>Add Post</DialogTitle>
         <PostForm />

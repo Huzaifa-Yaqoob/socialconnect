@@ -20,7 +20,7 @@ export default async function Page({ params, searchParams }: PageProps) {
   }
 
   return (
-    <main className="mx-auto max-w-2xl py-8">
+    <main className="mx-auto max-w-2xl flex-grow py-8">
       <h1 className="mb-6 text-2xl font-bold">Latest Posts</h1>
       {/* Server Component */}
       <PostsList page={page} userId={session.id} />

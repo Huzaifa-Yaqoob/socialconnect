@@ -20,7 +20,7 @@ export default async function ChatPage({ params }: PageProps) {
   const initialMessages = await getMessages(chat._id);
 
   return (
-    <div className="px-4 py-6">
+    <div className="flex-grow px-4 py-6">
       <ChatWindow chatId={chat._id} currentUserId={session.id} initialMessages={initialMessages} />
     </div>
   );

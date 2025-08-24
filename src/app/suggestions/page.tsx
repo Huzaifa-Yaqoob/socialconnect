@@ -18,8 +18,6 @@ export default async function SharedInterestsPage() {
 
   const users: User[] = await getUsersWithSharedInterests();
 
-  console.log(users, "aaasasasasas");
-
   // For each user, determine if the logged-in user is already following them
   // (assuming getUsersWithSharedInterests returns the 'following' array too)
   const usersWithFollowStatus = users.map((user: any) => ({
@@ -28,7 +26,7 @@ export default async function SharedInterestsPage() {
   }));
 
   return (
-    <div className="flex justify-center py-8">
+    <div className="flex flex-grow justify-center py-8">
       <div className="w-full max-w-sm space-y-4">
         {users.map((user) => (
           <Card key={user._id} className="rounded-2xl border shadow-none">

@@ -24,7 +24,7 @@ async function Page({ params }: PageProps) {
   const postDetail = await getPostById(post);
 
   return (
-    <div>
+    <div className={"flex-grow"}>
       <PostCard post={postDetail} currentUserId={session.id} />
     </div>
   );

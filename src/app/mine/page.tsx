@@ -15,7 +15,7 @@ export default async function MutualFollowersPage() {
   const users: User[] = await getMutualFollowers();
 
   return (
-    <div className="flex justify-center py-8">
+    <div className="flex flex-grow justify-center py-8">
       <div className="w-full max-w-sm space-y-4">
         {users.length === 0 && (
           <p className="text-muted-foreground text-center">No mutual followers found.</p>

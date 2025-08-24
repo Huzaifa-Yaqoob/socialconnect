@@ -53,7 +53,7 @@ export default function SearchPage({ currentUserId }: SearchPageProps) {
   };
 
   return (
-    <div className="flex flex-col items-center px-4 py-8">
+    <div className="flex flex-grow flex-col items-center px-4 py-8">
       {/* Search Bar */}
       <div className="mb-6 flex w-full max-w-md gap-2">
         <input
